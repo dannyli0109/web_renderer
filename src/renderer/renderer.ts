@@ -1,24 +1,26 @@
-import { Color } from "./color";
-import { Mesh } from "./mesh";
+import { Buffer } from "./buffer";
 import { Shader } from "./shader";
-import { Texture } from "./texture";
-import { Vector3 } from "./vector3";
+import { ShaderProgram } from "./shaderProgram";
 
 // Create a new interface to define renderer methods
 export interface Renderer {
-    // Define a method to render a Mesh with a Shader
-    rederMesh(mesh: Mesh, shader: Shader): void;
-
-    // Define a method to create a Texture
-    createTexture(path: string): Texture;
-
-    // Define a method to bind a Texture
-    bindTexture(textrue: Texture): void;
-
-    // Define a method to set the Light position
-    setLightPosition(position: Vector3): void;
-
-    // Define a method to set the Light color
-    setLightColor(color: Color): void;
-    
+    // Buffers
+    createBuffer(): Buffer;
+    bindBuffer(buffer: Buffer): void;
+    bufferData(target: number, data: number | ArrayBuffer, usage: number): void;
+    // Shaders
+    createShader(type: number): Shader;
+    attachShader(program: ShaderProgram, shader: Shader): void;
+    compileShader(shader: Shader): void;
+    // Programs
+    createProgram(): ShaderProgram;
+    useProgram(program: ShaderProgram): void;
+    linkProgram(program: ShaderProgram): void;
+    getAttribLocation(program: ShaderProgram, name: string): number;
+    getUniformLocation(program: ShaderProgram, name: string): any;
+    // Vertex attributes
+    enableVertexAttribArray(index: number): void;
+    vertexAttribPointer(index: number, size: number, type: number, normalized: boolean, stride: number, offset: number): void;
+    // Drawing
+    drawArrays(mode: number, start: number, count: number): void;
 }
