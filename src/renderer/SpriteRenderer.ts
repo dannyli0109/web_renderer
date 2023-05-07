@@ -1,4 +1,5 @@
 import { ArrayData } from "./arrayData";
+import { Buffer } from "./buffer";
 import { Matrix4 } from "./matrix4";
 import { Mesh } from "./mesh";
 import { Renderer } from "./renderer";
@@ -27,17 +28,15 @@ export class SpriteRenderer {
     private  _maxVertices: number;
     private _maxIndices: number;
     private _maxTextureSlots: number;
-    // private _verticies: {
-    //     position: Vector3,
-    //     uv: Vector2,
-    //     color: Vector4,
-    //     tiling: Vector2,
-    //     textureIndex: number
-    // }[];
     private _verticies: SpriteVertex[];
     private _indicies: Uint32Array;
     private _texures: Texture[];
+    private _vertexBuffer: Buffer;
+    private _indexBuffer: Buffer;
+    private _indexCount: number = 0;
+    private _vertexCount: number = 0;
     private _textureCount: number = 0;
+    private _projectionMatrix: Matrix4;
     constructor(renderer: Renderer, shaderProgram: ShaderProgram, batchSize: number = 512) {
         this._renderer = renderer;
         this._shaderProgram = shaderProgram;
@@ -47,9 +46,9 @@ export class SpriteRenderer {
 
         // Create buffers
         // Create vertex buffer
-        let vertexBuffer = this._renderer.createBuffer();
+        this._vertexBuffer = this._renderer.createBuffer();
         // Create index buffer
-        let indexBuffer = this._renderer.createBuffer();
+        this._indexBuffer = this._renderer.createBuffer();
         // Create vertex array object
         let vao = this._renderer.createVertexArray();
 
@@ -79,15 +78,15 @@ export class SpriteRenderer {
         this._textureCount = 0;
 
         // bind buffers
-        this._renderer.bindBuffer(this._renderer.BUFFER_TYPE.ARRAY_BUFFER, vertexBuffer);
-        this._renderer.bufferData(this._renderer.BUFFER_TYPE.ARRAY_BUFFER, vertexBuffer, null, this._renderer.BUFFER_USAGE.DYNAMIC_DRAW);
+        this._renderer.bindBuffer(this._renderer.BUFFER_TYPE.ARRAY_BUFFER, this._vertexBuffer);
+        this._renderer.bufferData(this._renderer.BUFFER_TYPE.ARRAY_BUFFER, this._vertexBuffer, null, this._renderer.BUFFER_USAGE.DYNAMIC_DRAW);
 
-        this._renderer.bindBuffer(this._renderer.BUFFER_TYPE.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        this._renderer.bufferData(this._renderer.BUFFER_TYPE.ELEMENT_ARRAY_BUFFER, indexBuffer, this._indicies, this._renderer.BUFFER_USAGE.STATIC_DRAW);
+        this._renderer.bindBuffer(this._renderer.BUFFER_TYPE.ELEMENT_ARRAY_BUFFER, this._indexBuffer);
+        this._renderer.bufferData(this._renderer.BUFFER_TYPE.ELEMENT_ARRAY_BUFFER, this._indexBuffer, this._indicies, this._renderer.BUFFER_USAGE.STATIC_DRAW);
 
         this._renderer.bindVertexArray(vao);
-        this._renderer.bindBuffer(this._renderer.BUFFER_TYPE.ARRAY_BUFFER, vertexBuffer);
-        this._renderer.bindBuffer(this._renderer.BUFFER_TYPE.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        this._renderer.bindBuffer(this._renderer.BUFFER_TYPE.ARRAY_BUFFER, this._vertexBuffer);
+        this._renderer.bindBuffer(this._renderer.BUFFER_TYPE.ELEMENT_ARRAY_BUFFER, this._indexBuffer);
 
         let dataSize = 0;
         for (let i = 0; i < SPRITE_VERTEX_ATTRIBUTES.length; i++) {
@@ -141,9 +140,13 @@ export class SpriteRenderer {
     }
 
     beginScene(projectionMatrix: Matrix4) {
-
-
+        this._projectionMatrix = projectionMatrix;
+        this._indexCount = 0;
+        this._vertexCount = 0;
+        this._textureCount = 0;
+        this._shaderProgram.setUniform("u_ProjectionMatrix", this._projectionMatrix);
     }
+    
     endScene() {
 
     }
