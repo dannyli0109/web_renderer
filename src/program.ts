@@ -13,8 +13,8 @@ export class Program {
     private _then: number = 0;
     private _elapsed: number;
 
-    init() {
-        WebglRenderer.getInstance();
+    async init() {
+        await WebglRenderer.getInstance().createShader('test', 'quad.vert', 'quad.frag');
     }
 
     update() {
@@ -26,7 +26,8 @@ export class Program {
         this._elapsed = now - this._then;
         this._then = now;
         let dt = this._elapsed / 1000;
-        console.log(dt);
+        WebglRenderer.getInstance().useProgram('test');
+        WebglRenderer.getInstance().draw();
         requestAnimationFrame(this.updateFrame.bind(this));
     }
 

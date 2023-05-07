@@ -1,7 +1,12 @@
-export class Matrix3 {
+import { ArrayData } from "./arrayData";
+
+export class Matrix3 implements ArrayData<number>{
     private _data: number[] = [];
     constructor() {
         this.identity();
+    }
+    toArray(): number[] {
+        return this._data;
     }
 
     identity() {
